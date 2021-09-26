@@ -267,7 +267,9 @@ export const mapParametersToFields = (
   typeName: string,
   gqlTypes: GraphQLTypeMap,
 ): GraphQLFieldConfigArgumentMap => {
-  return parameters.reduce((res: GraphQLFieldConfigArgumentMap, param) => {
+  return parameters
+    .filter(param => param.type !== 'header')
+    .reduce((res: GraphQLFieldConfigArgumentMap, param) => {
     const type = jsonSchemaTypeToGraphQL(
       `param_${typeName}`,
       param.jsonSchema,
