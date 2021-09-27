@@ -18,14 +18,16 @@ import {
   SwaggerSchema,
 } from './swagger';
 import {
-  GraphQLTypeMap,
-  jsonSchemaTypeToGraphQL,
-  mapParametersToFields,
+  GraphQLOutputTypeMap,
+  jsonSchemaTypeToOutputGraphQL,
+  mapParametersToInputFields,
 } from './typeMap';
 import { RequestOptions } from './getRequestOptions';
 import { RootGraphQLSchema } from './json-schema';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseResponse(response: any, returnType: GraphQLOutputType) {
+  
   const nullableType =
     returnType instanceof GraphQLNonNull ? returnType.ofType : returnType;
   if (
@@ -38,34 +40,35 @@ export function parseResponse(response: any, returnType: GraphQLOutputType) {
   if (nullableType.name === 'String' && typeof response !== 'string') {
     return JSON.stringify(response);
   }
-
   return response;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getFields = <TContext>(
   endpoints: Endpoints,
   isMutation: boolean,
-  gqlTypes: GraphQLTypeMap,
+  gqlTypes: GraphQLOutputTypeMap,
   { callBackend }: Options<TContext>,
 ): GraphQLFieldConfigMap<any, any> => {
+  const intpuGqlType = {};
   return Object.keys(endpoints)
     .filter((operationId: string) => {
       return !!endpoints[operationId].mutation === !!isMutation;
     })
     .reduce((result, operationId) => {
       const endpoint: Endpoint = endpoints[operationId];
-      const type = jsonSchemaTypeToGraphQL(
+      const type = jsonSchemaTypeToOutputGraphQL(
         operationId,
         endpoint.response || { type: 'object', properties: {} },
         'response',
-        false,
         gqlTypes,
         true,
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gType: GraphQLFieldConfig<any, any> = {
         type,
         description: endpoint.description,
-        args: mapParametersToFields(endpoint.parameters, operationId, gqlTypes),
+        args: mapParametersToInputFields(endpoint.parameters, operationId, intpuGqlType),
         resolve: async (
           _source: any,
           args: GraphQLParameters,
@@ -91,9 +94,9 @@ const schemaFromEndpoints = <TContext>(
 ): GraphQLSchema => {
   const gqlTypes = {};
   const queryFields = getFields(endpoints, false, gqlTypes, options);
-  if (!Object.keys(queryFields).length) {
-    throw new Error('Did not find any GET endpoints');
-  }
+  // if (!Object.keys(queryFields).length) {
+  //   throw new Error('Did not find any GET endpoints');
+  // }
   const rootType = new GraphQLObjectType({
     name: 'Query',
     fields: queryFields,

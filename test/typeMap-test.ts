@@ -6,18 +6,17 @@ import {
   GraphQLScalarType,
   GraphQLString,
 } from 'graphql';
-import { jsonSchemaTypeToGraphQL } from '../src/typeMap';
+import { jsonSchemaTypeToInputGraphQL } from '../src/typeMap';
 
 describe('typeMap', () => {
   describe('jsonSchemaTypeToGraphQL', () => {
     it('should give an unsupported type for files', () => {
-      const graphqlFileType = jsonSchemaTypeToGraphQL(
+      const graphqlFileType = jsonSchemaTypeToInputGraphQL(
         'mocktitle',
         {
           type: 'file',
         },
         'mockpropertyname',
-        true,
         {},
         false,
       ) as GraphQLInputObjectType;
@@ -35,7 +34,7 @@ describe('typeMap', () => {
     });
 
     it('should give an unsupported type for list of files', () => {
-      const graphqlList = jsonSchemaTypeToGraphQL(
+      const graphqlList = jsonSchemaTypeToInputGraphQL(
         'mocktitle',
         {
           type: 'array',
@@ -44,7 +43,6 @@ describe('typeMap', () => {
           },
         },
         'mockpropertyname',
-        true,
         {},
         false,
       ) as GraphQLList<GraphQLNonNull<GraphQLInputObjectType>>;
@@ -68,7 +66,7 @@ describe('typeMap', () => {
 
     // TODO: make this a union type?
     it('should take the first item type of an array with multiple item types', () => {
-      const graphqlList = jsonSchemaTypeToGraphQL(
+      const graphqlList = jsonSchemaTypeToInputGraphQL(
         'mocktitle',
         {
           type: 'array',
@@ -82,7 +80,6 @@ describe('typeMap', () => {
           ],
         },
         'mockpropertyname',
-        true,
         {},
         false,
       ) as GraphQLList<GraphQLNonNull<GraphQLScalarType>>;

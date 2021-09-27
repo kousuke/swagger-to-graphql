@@ -6,17 +6,17 @@ import graphQLSchema from '../src';
 
 describe('Fixture', () => {
   const directory = `${__dirname}/fixtures/`;
-  fs.readdirSync(directory).forEach(file => {
+  fs.readdirSync(directory).forEach((file) => {
     if (file.endsWith('.json')) {
       describe(file, () => {
-        const graphqlFile = file.replace('.json', '.graphql');
+        const graphqlFile = file.replace('.json', '.txt');
         it(`should convert to ${graphqlFile}`, () =>
           graphQLSchema({
             swaggerSchema: directory + file,
             callBackend() {
               return new Promise(() => {});
             },
-          }).then(schema => {
+          }).then((schema) => {
             const graphqlfile = directory + graphqlFile;
             const graphschema = graphql.printSchema(schema);
             const expected = fs.readFileSync(graphqlfile, 'utf8');

@@ -1,3 +1,7 @@
+type Query {
+  get_test: [DeepStructure!]!
+}
+
 type DeepStructure {
   id: String!
   body: DeepStructure_body!
@@ -12,8 +16,4 @@ type DeepStructure_body {
 type DeepStructure_body_url {
   protocol: String
   baseURL: String
-}
-
-type Query {
-  get_test: [DeepStructure!]!
 }

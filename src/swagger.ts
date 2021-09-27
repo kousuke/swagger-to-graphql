@@ -30,7 +30,7 @@ export interface Responses {
 export const getSuccessResponse = (
   responses: Responses,
 ): JSONSchemaType | undefined => {
-  const successCode = Object.keys(responses).find(code => {
+  const successCode = Object.keys(responses).find((code) => {
     return code[0] === '2';
   });
 
@@ -97,10 +97,10 @@ export const isOa3Param = (param: Param): param is Oa3Param => {
 
 export function addTitlesToJsonSchemas(schema: SwaggerSchema): SwaggerSchema {
   const requestBodies = (schema.components || {}).requestBodies || {};
-  Object.keys(requestBodies).forEach(requestBodyName => {
+  Object.keys(requestBodies).forEach((requestBodyName) => {
     const { content } = requestBodies[requestBodyName];
     (Object.keys(content) as (keyof OA3BodyParam['content'])[]).forEach(
-      contentKey => {
+      (contentKey) => {
         const contentValue = content[contentKey];
         if (contentValue) {
           contentValue.schema.title =
@@ -111,13 +111,13 @@ export function addTitlesToJsonSchemas(schema: SwaggerSchema): SwaggerSchema {
   });
 
   const jsonSchemas = (schema.components || {}).schemas || {};
-  Object.keys(jsonSchemas).forEach(schemaName => {
+  Object.keys(jsonSchemas).forEach((schemaName) => {
     const jsonSchema = jsonSchemas[schemaName];
     jsonSchema.title = jsonSchema.title || schemaName;
   });
 
   const definitions = schema.definitions || {};
-  Object.keys(definitions).forEach(definitionName => {
+  Object.keys(definitions).forEach((definitionName) => {
     const jsonSchema = definitions[definitionName];
     jsonSchema.title = jsonSchema.title || definitionName;
   });
@@ -299,9 +299,9 @@ export interface SwaggerSchema {
 export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
   const allOperations: Endpoints = {};
   const serverPath = getServerPath(schema);
-  Object.keys(schema.paths).forEach(path => {
+  Object.keys(schema.paths).forEach((path) => {
     const route = schema.paths[path];
-    Object.keys(route).forEach(method => {
+    Object.keys(route).forEach((method) => {
       if (method === 'parameters' || method === 'servers') {
         return;
       }
@@ -329,7 +329,7 @@ export const getAllEndPoints = (schema: SwaggerSchema): Endpoints => {
 
       const parameterDetails = [
         ...(operationObject.parameters
-          ? operationObject.parameters.map(param => getParamDetails(param))
+          ? operationObject.parameters.map((param) => getParamDetails(param))
           : []),
         ...bodyParams,
       ];

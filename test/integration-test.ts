@@ -2,7 +2,7 @@
 import nock from 'nock';
 import request from 'supertest';
 import express, { Express } from 'express';
-import graphqlHTTP from 'express-graphql';
+import { graphqlHTTP } from 'express-graphql';
 import graphQLSchema from '../src';
 import { createTestOptions } from './createTestOptions';
 
@@ -13,10 +13,10 @@ const createServer = async (
   const schema = await graphQLSchema(...args);
   app.use(
     '/graphql',
-    graphqlHTTP(() => ({
+    graphqlHTTP({
       schema,
       graphiql: true,
-    })),
+    }),
   );
   return app;
 };
