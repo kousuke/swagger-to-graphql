@@ -18,6 +18,7 @@ import {
   SwaggerSchema,
 } from './swagger';
 import {
+  GraphQLInputTypeMap,
   GraphQLOutputTypeMap,
   jsonSchemaTypeToOutputGraphQL,
   mapParametersToInputFields,
@@ -27,7 +28,6 @@ import { RootGraphQLSchema } from './json-schema';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function parseResponse(response: any, returnType: GraphQLOutputType) {
-  
   const nullableType =
     returnType instanceof GraphQLNonNull ? returnType.ofType : returnType;
   if (
@@ -47,10 +47,10 @@ export function parseResponse(response: any, returnType: GraphQLOutputType) {
 const getFields = <TContext>(
   endpoints: Endpoints,
   isMutation: boolean,
-  gqlTypes: GraphQLOutputTypeMap,
+  outputGqlTypes: GraphQLOutputTypeMap,
+  inputGqlTypes: GraphQLInputTypeMap,
   { callBackend }: Options<TContext>,
 ): GraphQLFieldConfigMap<any, any> => {
-  const intpuGqlType = {};
   return Object.keys(endpoints)
     .filter((operationId: string) => {
       return !!endpoints[operationId].mutation === !!isMutation;
@@ -61,14 +61,18 @@ const getFields = <TContext>(
         operationId,
         endpoint.response || { type: 'object', properties: {} },
         'response',
-        gqlTypes,
+        outputGqlTypes,
         true,
       );
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const gType: GraphQLFieldConfig<any, any> = {
         type,
         description: endpoint.description,
-        args: mapParametersToInputFields(endpoint.parameters, operationId, intpuGqlType),
+        args: mapParametersToInputFields(
+          endpoint.parameters,
+          operationId,
+          inputGqlTypes,
+        ),
         resolve: async (
           _source: any,
           args: GraphQLParameters,
@@ -92,21 +96,33 @@ const schemaFromEndpoints = <TContext>(
   endpoints: Endpoints,
   options: Options<TContext>,
 ): GraphQLSchema => {
-  const gqlTypes = {};
-  const queryFields = getFields(endpoints, false, gqlTypes, options);
+  const outputGqlTypes = {};
+  const inputGqlTypes = {};
+  const queryFields = getFields(
+    endpoints,
+    false,
+    outputGqlTypes,
+    inputGqlTypes,
+    options,
+  );
   // if (!Object.keys(queryFields).length) {
   //   throw new Error('Did not find any GET endpoints');
   // }
-  const rootType = new GraphQLObjectType({
-    name: 'Query',
-    fields: queryFields,
-  });
 
   const graphQLSchema: RootGraphQLSchema = {
-    query: rootType,
+    query: new GraphQLObjectType({
+      name: 'Query',
+      fields: queryFields,
+    }),
   };
 
-  const mutationFields = getFields(endpoints, true, gqlTypes, options);
+  const mutationFields = getFields(
+    endpoints,
+    true,
+    outputGqlTypes,
+    inputGqlTypes,
+    options,
+  );
   if (Object.keys(mutationFields).length) {
     graphQLSchema.mutation = new GraphQLObjectType({
       name: 'Mutation',
@@ -136,6 +152,7 @@ export const createSchema = async <TContext>(
     options.swaggerSchema,
   )) as SwaggerSchema;
   const swaggerSchema = addTitlesToJsonSchemas(schemaWithoutReferences);
+  // console.error(swaggerSchema);
   const endpoints = getAllEndPoints(swaggerSchema);
   return schemaFromEndpoints(endpoints, options);
 };

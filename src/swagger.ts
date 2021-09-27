@@ -96,7 +96,7 @@ export const isOa3Param = (param: Param): param is Oa3Param => {
 };
 
 export function addTitlesToJsonSchemas(schema: SwaggerSchema): SwaggerSchema {
-  const requestBodies = (schema.components || {}).requestBodies || {};
+  const requestBodies = schema.components?.requestBodies || {};
   Object.keys(requestBodies).forEach((requestBodyName) => {
     const { content } = requestBodies[requestBodyName];
     (Object.keys(content) as (keyof OA3BodyParam['content'])[]).forEach(
@@ -110,7 +110,7 @@ export function addTitlesToJsonSchemas(schema: SwaggerSchema): SwaggerSchema {
     );
   });
 
-  const jsonSchemas = (schema.components || {}).schemas || {};
+  const jsonSchemas = schema.components?.schemas || {};
   Object.keys(jsonSchemas).forEach((schemaName) => {
     const jsonSchema = jsonSchemas[schemaName];
     jsonSchema.title = jsonSchema.title || schemaName;
